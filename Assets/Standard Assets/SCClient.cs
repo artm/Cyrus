@@ -8,16 +8,20 @@ using System.Net.Sockets;
 using Bespoke.Common.Osc;
 
 public class SCClient : MonoBehaviour {
-
+	#region public fields
 	public string scHostname = "localhost";
 	public int scPort = 57110;
-
 	public int listenPort = 6666;
+	public GameObject[] listeners;
+	#endregion
+
+	#region private fields
 	bool listen = true;
+	UdpClient client;
+	#endregion
 
 	IPEndPoint LocalEP { get { return client.Client.LocalEndPoint as IPEndPoint; } }
 	IPEndPoint RemoteEP { get { return client.Client.RemoteEndPoint as IPEndPoint; } }
-	UdpClient client;
 
 	void Start () {
 		OscPacket.LittleEndianByteOrder = false;
@@ -41,8 +45,8 @@ public class SCClient : MonoBehaviour {
 
 	class UdpState {
 		UdpClient client;
-		OscPacket data = null;
-		public OscPacket Data { get { return data; } }
+		byte[] data = null;
+		public byte[] Data { get { return data; } }
 
 		public UdpState(UdpClient c) {
 			client = c;
@@ -55,8 +59,7 @@ public class SCClient : MonoBehaviour {
 
 		void End(IAsyncResult ar) {
 			IPEndPoint tmp = client.Client.RemoteEndPoint as IPEndPoint;
-			byte[] buffer = client.EndReceive(ar, ref tmp);
-			data = OscPacket.FromByteArray( tmp, buffer );
+			data = client.EndReceive(ar, ref tmp);
 		}
 
 		static void EndCallback(IAsyncResult ar)
@@ -77,17 +80,33 @@ public class SCClient : MonoBehaviour {
 			}
 			if (!listen)
 				break;
-			// react to Data
-			if (s.Data.IsBundle) {
-				Debug.LogWarning("FIXME bundle reception not implemented");
-			} else {
-				OscMessage m = s.Data as OscMessage;
-				Debug.Log(m.Address + " " + m.ToString());
-			}
+			Process(s.Data);
 		} while(listen);
 		Debug.Log("Exiting UDP listen loop");
 	}
 
+	void Process(byte[] data)
+	{
+		int offset = 0;
+		string path = Osc.ReadString(data,ref offset);
+		string types = Osc.ReadString(data,ref offset);
+
+		switch(path) {
+		case "/spectrum":
+			object[] args = Osc.ToArray(data,offset,types);
+			float[] spectrum = new float[(args.Length-2)/2];
+			for(int i = 0; i<spectrum.Length; i++) {
+				spectrum[i] = (float)args[2+2*i];
+			}
+			foreach(GameObject listener in listeners){
+				listener.BroadcastMessage("OnAudioSpectrum", spectrum);
+			}
+			break;
+		default:
+			Debug.Log("SC: " + path);
+			break;
+		}
+	}
 
 	IPAddress ResolveIPString(string host)
 	{
