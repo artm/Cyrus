@@ -11,10 +11,10 @@
 	s = Server.default;\
 	o = Server.default.options;\
 		\
-	// normally - listen to the microphone\
-	//o.inDevice = "Build-in Input";\
 	// for now - listen to itunes\
 	o.inDevice = "Soundflower (2ch)";\
+	// normally - listen to the microphone\
+	o.inDevice = "Build-in Input";\
 \
 	// when soundflower is set as OS default output I want to pass music through here...\
 	o.outDevice = "Built-in Output";\
@@ -50,24 +50,23 @@
 			UnpackFFT(chain, fftsize, frombin:0, tobin: 32));\
 		\
 		// now actually send data to all subscribed clients\
-		// uses the same trigger signal\
-		SendReply.kr(chain>=0,"/spectrum",[ dem ]);\
+		// but less often\
+		SendReply.kr(Impulse.kr(20),"/spectrum",[ dem ]);\
 	\}.play;\
 	\
 )\
 \
-// debugging: print server replies\
-d = OSCresponder(s.addr, "/spectrum", \{ |t,r,msg| msg.postln; \}).add;	\
+\{SoundIn.ar([0,1])\}.play;\
 \
-// silence the debug receiver\
+d = OSCresponder(s.addr, "/spectrum", \{ |t,r,msg| msg.postln; \}).add;	\
 d.remove;\
+\
+s.dumpOSC(1);\
+s.dumpOSC(0);\
 \
 // Stop the process without killing the server\
 s.freeAll;\
 \
-NetAddr("localhost",6666).sendMsg("/hello");\
-NetAddr("localhost",6666).sendMsg("/hello", "world", 666);\
-\
-s.dumpOSC(1);\
-s.dumpOSC(0);\
+n = NetAddr("localhost",6666);\
+n.sendMsg("/hello");\
 }
