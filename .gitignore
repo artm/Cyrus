@@ -1,0 +1,17 @@
+Assembly*
+Library
+*.sln
+Temp
+*.unitypackage
+*.zip
+*.prefab
+*.anim
+*.userprefs
+*.asset
+*.mat
+*.GUISkin
+*.unity
+*.aiff
+*.app
+*.exe
+*_data
