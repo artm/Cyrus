@@ -21,12 +21,8 @@ public class SCClient : MonoBehaviour {
 	void Start () {
 		client = new UdpClient(listenPort);
 		client.Connect(scHostname,scPort);
-
-		// start listening
-		StartCoroutine( Listen() );
-
-		// subscribe
 		Send("/notify", 1);
+		StartCoroutine( Listen() );
 	}
 
 	void OnApplicationQuit()
@@ -42,7 +38,8 @@ public class SCClient : MonoBehaviour {
 		byte[] data = null;
 		public byte[] Data { get { return data; } }
 
-		public UdpState(UdpClient c) {
+		public UdpState(UdpClient c)
+		{
 			client = c;
 		}
 
@@ -79,7 +76,6 @@ public class SCClient : MonoBehaviour {
 				listener.BroadcastMessage("OnOscMessage", msg);
 
 		} while(listen);
-		Debug.Log("Exiting UDP listen loop");
 	}
 
 	IPAddress ResolveIPString(string host)
