@@ -18,9 +18,6 @@ public class SCClient : MonoBehaviour {
 	UdpClient client;
 	#endregion
 
-	IPEndPoint LocalEP { get { return client.Client.LocalEndPoint as IPEndPoint; } }
-	IPEndPoint RemoteEP { get { return client.Client.RemoteEndPoint as IPEndPoint; } }
-
 	void Start () {
 		client = new UdpClient(listenPort);
 		client.Connect(scHostname,scPort);
