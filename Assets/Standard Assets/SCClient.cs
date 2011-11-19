@@ -81,23 +81,18 @@ public class SCClient : MonoBehaviour {
 
 	void Process(byte[] data)
 	{
-		int offset = 0;
-		string path = Osc.ReadString(data,ref offset);
-		string types = Osc.ReadString(data,ref offset);
-
-		switch(path) {
+		object[] objs = Osc.ToArray(data);
+		switch(objs[0] as String) {
 		case "/spectrum":
-			object[] args = Osc.ToArray(data,offset,types);
-			float[] spectrum = new float[(args.Length-2)/2];
-			for(int i = 0; i<spectrum.Length; i++) {
-				spectrum[i] = (float)args[2+2*i];
-			}
-			foreach(GameObject listener in listeners){
+			float[] spectrum = new float[(objs.Length-3)/2];
+			for(int i = 0; i<spectrum.Length; i++)
+				spectrum[i] = (float)objs[3+2*i];
+			foreach(GameObject listener in listeners)
 				listener.BroadcastMessage("OnAudioSpectrum", spectrum);
-			}
+
 			break;
 		default:
-			Debug.Log("SC: " + path);
+			Debug.Log("SC: " + objs[0]);
 			break;
 		}
 	}
