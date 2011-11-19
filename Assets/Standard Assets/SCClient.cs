@@ -5,8 +5,6 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 
-using Bespoke.Common.Osc;
-
 public class SCClient : MonoBehaviour {
 	#region public fields
 	public string scHostname = "localhost";
@@ -24,7 +22,6 @@ public class SCClient : MonoBehaviour {
 	IPEndPoint RemoteEP { get { return client.Client.RemoteEndPoint as IPEndPoint; } }
 
 	void Start () {
-		OscPacket.LittleEndianByteOrder = false;
 		client = new UdpClient(listenPort);
 		client.Connect(scHostname,scPort);
 
@@ -118,35 +115,9 @@ public class SCClient : MonoBehaviour {
 		return addrs[0];
 	}
 
-	static bool AppendIfTypeMatches<T>(OscMessage m, object o) {
-		if (o.GetType() == typeof(T)) {
-			m.Append<T>((T)o);
-			return true;
-		}
-		return false;
-	}
-
-	public class OscIncompatibleTypeError : System.Exception {
-		public OscIncompatibleTypeError(object o)
-			: base("Unsupported OSC payload type: " + o.GetType().Name)
-		{}
-	}
-
-	void Send(string path, params object[] payload)
+	void Send(params object[] payload)
 	{
-		OscMessage m = new OscMessage(LocalEP, path);
-		foreach(object o in payload) {
-			if (!AppendIfTypeMatches<int>(m,o) &&
-			    !AppendIfTypeMatches<long>(m,o) &&
-			    !AppendIfTypeMatches<float>(m,o) &&
-			    !AppendIfTypeMatches<double>(m,o) &&
-			    !AppendIfTypeMatches<string>(m,o) &&
-			    !AppendIfTypeMatches<byte[]>(m,o))
-			{
-				throw new OscIncompatibleTypeError(o);
-			}
-		}
-		byte[] data = m.ToByteArray();
+		byte[] data = Osc.FromArray(payload);
 		client.Send(data, data.Length);
 	}
 }

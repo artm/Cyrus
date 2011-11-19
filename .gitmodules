@@ -1,0 +1,3 @@
+[submodule "Assets/Standard Assets/Plugins/Osc"]
+	path = Assets/Standard Assets/Plugins/Osc
+	url = git@github.com:artm/Osc.cs.git
