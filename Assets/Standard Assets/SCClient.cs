@@ -74,27 +74,12 @@ public class SCClient : MonoBehaviour {
 			}
 			if (!listen)
 				break;
-			Process(s.Data);
+			object[] msg = Osc.ToArray(s.Data);
+			foreach(GameObject listener in listeners)
+				listener.BroadcastMessage("OnOscMessage", msg);
+
 		} while(listen);
 		Debug.Log("Exiting UDP listen loop");
-	}
-
-	void Process(byte[] data)
-	{
-		object[] objs = Osc.ToArray(data);
-		switch(objs[0] as String) {
-		case "/spectrum":
-			float[] spectrum = new float[(objs.Length-3)/2];
-			for(int i = 0; i<spectrum.Length; i++)
-				spectrum[i] = (float)objs[3+2*i];
-			foreach(GameObject listener in listeners)
-				listener.BroadcastMessage("OnAudioSpectrum", spectrum);
-
-			break;
-		default:
-			Debug.Log("SC: " + objs[0]);
-			break;
-		}
 	}
 
 	IPAddress ResolveIPString(string host)
