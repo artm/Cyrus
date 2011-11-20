@@ -11,6 +11,7 @@ public class SCClient : MonoBehaviour {
 	public int scPort = 57110;
 	public int listenPort = 6666;
 	public GameObject[] listeners;
+	public bool debug = false;
 	#endregion
 
 	#region private fields
@@ -72,8 +73,15 @@ public class SCClient : MonoBehaviour {
 			if (!listen)
 				break;
 			object[] msg = Osc.ToArray(s.Data);
-			foreach(GameObject listener in listeners)
+			foreach(GameObject listener in listeners) {
 				listener.BroadcastMessage("OnOscMessage", msg);
+				if (debug) {
+					string ds = "";
+					foreach(object o in msg)
+						ds += o.ToString() + " ";
+					Debug.Log(ds);
+				}
+			}
 
 		} while(listen);
 	}
