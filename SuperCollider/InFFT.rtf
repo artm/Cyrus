@@ -14,7 +14,7 @@
 	// for now - listen to itunes\
 	o.inDevice = "Soundflower (2ch)";\
 	// normally - listen to the microphone\
-	o.inDevice = "Build-in Input";\
+	//o.inDevice = "Build-in Input";\
 \
 	// when soundflower is set as OS default output I want to pass music through here...\
 	o.outDevice = "Built-in Output";\
@@ -34,8 +34,7 @@
 \
 		chain = \cf3 FFT\cf0 (\
 			\cf3 LocalBuf\cf0 (fftsize), \
-			\cf4 SoundIn\cf0 .ar(0), \
-			1.0, 1);\
+			\cf4 SoundIn\cf0 .ar(0));\
 		\
 		dem = Demand.kr(\
 		\
@@ -47,11 +46,12 @@
 			\
 			// Demand can't deal with more then 32 bins (64 numbers), \
 			// so we have to restrict the portion of the spectrum to send			\
-			UnpackFFT(chain, fftsize, frombin:0, tobin: 32));\
+			UnpackFFT(chain, fftsize, frombin:0, tobin: 16));\
 		\
 		// now actually send data to all subscribed clients\
 		// but less often\
 		SendReply.kr(Impulse.kr(20),"/spectrum",[ dem ]);\
+		\
 	\}.play;\
 	\
 )\
@@ -59,6 +59,7 @@
 \{SoundIn.ar([0,1])\}.play;\
 \
 d = OSCresponder(s.addr, "/spectrum", \{ |t,r,msg| msg.postln; \}).add;	\
+d = OSCresponder(s.addr, "/mfcc", \{ |t,r,msg| msg.postln; \}).add;	\
 d.remove;\
 \
 s.dumpOSC(1);\
