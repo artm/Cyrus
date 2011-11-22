@@ -3,7 +3,8 @@ Shader "Custom/Mirk" {
 		_Color("Color", Color) = (1, 1, 1, 1)
 		AlphaThreshold("AlphaThreshold", Range(0,1)) = 0.5
 		Fade("Fade", Range(0,1)) = 1
-		NoiseScale1("Noise Scale 1", float) = 1.0
+		NoiseScale("Noise Scale", float) = 1.0
+		NoiseSpeed("Noise Speed", float) = 1.0
 		Banding("Banding", float) = 1
 	}
 	SubShader {
@@ -14,8 +15,8 @@ Shader "Custom/Mirk" {
 		AlphaTest Greater [AlphaThreshold]
 
 		// Don't use alpha for blending
-		//Blend One One
-		Blend SrcColor OneMinusSrcColor
+		Blend One One
+		//Blend SrcColor OneMinusSrcColor
 		//Blend One OneMinusSrcColor
 
 		// Nice effect, but needs different fading
@@ -28,16 +29,17 @@ Shader "Custom/Mirk" {
 
 #include "noise3d.cginc"
 
-uniform float NoiseScale1, NoiseScale2, Banding, Fade;
+uniform float NoiseScale, NoiseSpeed, Banding, Fade;
 
 uniform float4 _Color;
 
 struct Input {
 	float3 worldPos;
+	float3 worldNormal;
 };
 
 void surf (Input IN, inout SurfaceOutput o) {
-	o.Alpha = frac( Banding * _Color.a * ( .5 + .5 * snoise(IN.worldPos * NoiseScale1)));
+	o.Alpha = frac( Banding * _Color.a * ( .5 + .5 * snoise( (IN.worldPos + normalize(IN.worldNormal) * _Time * NoiseSpeed) * NoiseScale)));
 	o.Emission = _Color.rgb * Fade * o.Alpha;
 }
 
