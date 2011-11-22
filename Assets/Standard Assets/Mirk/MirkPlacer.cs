@@ -38,9 +38,7 @@ public class MirkPlacer : MonoBehaviour {
 
 		if (fadeLayer) {
 			float newFade = (tmp.z-minDistance) / (maxDistance-minDistance);
-			if (newFade > fade)
-				// this is a problem (happens too often?)
-				fadeLayer.material = origMaterial;
+			fadeLayer.material.CopyPropertiesFromMaterial(origMaterial);
 			fade = newFade;
 			fadeLayer.material.SetFloat("Fade", fade);
 
