@@ -14,7 +14,8 @@ public class Vehicle : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		transform.Translate( 0, 0, speed * Time.deltaTime );
-		transform.Rotate( Vector3.up, rotSpeed * Input.GetAxis("Horizontal") * Time.deltaTime );
-		transform.Rotate( Vector3.right, - rotSpeed * Input.GetAxis("Vertical") * Time.deltaTime );
+		transform.Rotate(- rotSpeed * Input.GetAxis("Vertical") * Time.deltaTime,
+		                 rotSpeed * Input.GetAxis("Horizontal") * Time.deltaTime,
+		                 0);
 	}
 }
