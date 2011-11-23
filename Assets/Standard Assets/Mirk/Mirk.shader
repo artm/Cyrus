@@ -1,11 +1,11 @@
-Shader "Custom/Mirk" {
+Shader "Mirk/Overlay" {
 	Properties {
-		_Color("Color", Color) = (1, 1, 1, 1)
-		AlphaThreshold("AlphaThreshold", Range(0,1)) = 0.5
+		_Color("Color", Color) = (1, 1, 1, 0)
+		AlphaThreshold("Threshold", Range(0,1)) = 0
+		NoiseScale("Noise Scale", float) = 1
+		NoiseBands("Noise Bands", float) = 1
+
 		Fade("Fade", Range(0,1)) = 1
-		NoiseScale("Noise Scale", float) = 1.0
-		NoiseSpeed("Noise Speed", float) = 1.0
-		Banding("Banding", float) = 1
 	}
 	SubShader {
 		Tags { "Queue" = "Transparent" }
@@ -18,9 +18,11 @@ Shader "Custom/Mirk" {
 		Blend One One
 		//Blend SrcColor OneMinusSrcColor
 		//Blend One OneMinusSrcColor
+		//Blend SrcColor One
 
-		// Nice effect, but needs different fading
+		// Nice effects, but need different fading
 		//Blend SrcColor DstColor
+		//Blend DstColor SrcColor
 
 
 		CGPROGRAM
@@ -29,17 +31,13 @@ Shader "Custom/Mirk" {
 
 #include "noise3d.cginc"
 
-uniform float NoiseScale, NoiseSpeed, Banding, Fade;
-
+uniform float NoiseScale, NoiseBands, Fade;
 uniform float4 _Color;
-
 struct Input {
 	float3 worldPos;
-	float3 worldNormal;
 };
-
 void surf (Input IN, inout SurfaceOutput o) {
-	o.Alpha = frac( Banding * _Color.a * ( .5 + .5 * snoise( (IN.worldPos + normalize(IN.worldNormal) * _Time * NoiseSpeed) * NoiseScale)));
+	o.Alpha = frac( NoiseBands * (0.5 + 0.5 * snoise( IN.worldPos * NoiseScale)));
 	o.Emission = _Color.rgb * Fade * o.Alpha;
 }
 

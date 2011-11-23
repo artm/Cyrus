@@ -3,13 +3,12 @@ using System.Collections;
 
 public class CosmicDancer : MonoBehaviour {
 
-	public int offset = 0;
-	public float scaleSpeed = 1, turnSpeed = 1;
+	public int offset = 1;
+	public float scaleSpeed = 1;
 
 	void OnAudioSpectrum(float[] s)
 	{
 		transform.localScale = new Vector3(1,1,1) + scaleSpeed * specVec(s, offset);
-		transform.Rotate(turnSpeed * specVec(s, offset+3));
 	}
 
 	Vector3 specVec(float[] s, int offs)

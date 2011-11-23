@@ -24,7 +24,7 @@
 )\
 \
 (\
-	var	fftsize = 128;\
+	var	fftsize = 512;\
 	\
 	// because I keep restarting this chunk\
 	s.freeAll;\
@@ -50,7 +50,7 @@
 		\
 		// now actually send data to all subscribed clients\
 		// but less often\
-		SendReply.kr(Impulse.kr(20),"/spectrum",[ dem ]);\
+		SendReply.kr(Impulse.kr(14),"/spectrum",[ dem ]);\
 		\
 	\}.play;\
 	\
