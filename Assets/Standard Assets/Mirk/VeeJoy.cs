@@ -163,8 +163,11 @@ public class VeeJoy : MonoBehaviour {
 			current = (++current) % floatControllers.Count;
 		}
 
-		if (Input.GetKeyDown("tab"))
+		if (Input.GetKeyDown("tab")) {
 			showGUI = !showGUI;
+			Screen.showCursor = showGUI;
+		}
+
 
 		if (CurrentController.desc.listen) {
 			CurrentController.ApplyDeltaAdd(Input.GetAxis("Vertical3") * Time.deltaTime);
