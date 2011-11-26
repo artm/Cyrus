@@ -3,10 +3,8 @@ using System;
 using System.Collections;
 
 public class SpectrumParser : MonoBehaviour {
-	public float mul = 1;
-	public bool log = true;
-	public float logP0 = 100f;
-	public float logOffs = 3f;
+	public float referenceAmplitude = 100f;
+	public float sensitivity = 3f;
 
 
 	void OnOscMessage(object[] msg)
@@ -16,7 +14,7 @@ public class SpectrumParser : MonoBehaviour {
 			float[] spectrum = new float[(msg.Length-3)/2];
 			for(int i = 0; i<spectrum.Length; i++) {
 				float v = Mathf.Abs((float)msg[3+2*i]);
-				spectrum[i] = mul * (log ? Mathf.Max(0, logOffs + Mathf.Log10(v / logP0)) : v);
+				spectrum[i] = Mathf.Max(0, sensitivity + Mathf.Log10(v / referenceAmplitude));
 			}
 			BroadcastMessage("OnAudioSpectrum", spectrum, SendMessageOptions.DontRequireReceiver);
 		}
