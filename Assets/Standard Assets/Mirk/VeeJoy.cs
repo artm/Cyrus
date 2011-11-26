@@ -31,6 +31,10 @@ public class VeeJoy : MonoBehaviour {
 		public bool canListen = true, listen = false;
 		public int band = 1;
 		public float add = 0, mul = 1;
+
+		public FloatDesc Clone() {
+			return this.MemberwiseClone() as FloatDesc;
+		}
 	}
 
 	public abstract class FloatController {
@@ -85,16 +89,24 @@ public class VeeJoy : MonoBehaviour {
 						floatControllers.Add(new FieldFloatController(desc,fi));
 					}
 				} else if (tokens.Length == 2) {
-					// the property name is ComponentName.PropertyName
-					Component c = (desc.target as GameObject).GetComponent(tokens[0]);
-					if (c==null)
-						throw new PropertyError();
-					System.Type type = c.GetType();
-					FieldInfo fi = type.GetField(tokens[1]);
-					if (fi == null || fi.FieldType != typeof(float))
-						throw new PropertyError();
-					desc.target = c;
-					floatControllers.Add(new FieldFloatController(desc,fi));
+					if (desc.target is Material && tokens[1] == "hsv") {
+						// special case: color
+						desc.property = tokens[0];
+						floatControllers.Add(new MaterialColorController(desc.Clone(), MaterialColorController.Component.Hue));
+						floatControllers.Add(new MaterialColorController(desc.Clone(), MaterialColorController.Component.Saturation));
+						floatControllers.Add(new MaterialColorController(desc.Clone(), MaterialColorController.Component.Value));
+					} else {
+						// the property name is ComponentName.PropertyName
+						Component c = (desc.target as GameObject).GetComponent(tokens[0]);
+						if (c==null)
+							throw new PropertyError();
+						System.Type type = c.GetType();
+						FieldInfo fi = type.GetField(tokens[1]);
+						if (fi == null || fi.FieldType != typeof(float))
+							throw new PropertyError();
+						desc.target = c;
+						floatControllers.Add(new FieldFloatController(desc,fi));
+					}
 				}
 			} catch (PropertyError) {
 				Debug.LogError("Error reflecting on property " + desc.property + " of " + desc.target);
@@ -118,6 +130,69 @@ public class VeeJoy : MonoBehaviour {
 
 		public override string Name {
 			get { return material.name + "." + desc.property; }
+		}
+	}
+
+	public class MaterialColorController : FloatController {
+		Material material;
+		public enum Component { Hue, Saturation, Value };
+		Component component;
+
+		public MaterialColorController(FloatDesc desc, Component comp)
+			: base(desc)
+		{
+			material = desc.target as Material;
+			component = comp;
+
+			desc.min = 0;
+			if (component == Component.Hue) {
+				desc.max = 360;
+				desc.speed = 10;
+			} else {
+				desc.max = 1;
+				desc.speed = 0.1f;
+			}
+		}
+
+		protected override float Value {
+			get {
+				Color c = material.GetColor(desc.property);
+				float h, s, v;
+				ColorUtil.RGBtoHSV(c.r, c.g, c.b, out h, out s, out v);
+				switch(component) {
+				case Component.Hue:
+					return h;
+				case Component.Saturation:
+					return s;
+				case Component.Value:
+				default:
+					return v;
+				}
+			}
+			set {
+				Color c = material.GetColor(desc.property);
+				float h, s, v;
+				ColorUtil.RGBtoHSV(c.r, c.g, c.b, out h, out s, out v);
+				switch(component) {
+				case Component.Hue:
+					h = value;
+					break;
+				case Component.Saturation:
+					s = value;
+					break;
+				case Component.Value:
+					v = value;
+					break;
+				}
+				ColorUtil.HSVtoRGB(h,s,v,out c.r, out c.g, out c.b);
+				material.SetColor(desc.property, c);
+			}
+		}
+
+		public override string Name {
+			get {
+				return material.name + "." + desc.property + '.' + component.ToString();
+			}
 		}
 	}
 
