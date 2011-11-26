@@ -48,6 +48,20 @@ public class VeeJoy : MonoBehaviour {
 			Value = Mathf.Clamp( Value + delta * desc.speed, desc.min, desc.max );
 		}
 
+		public void ApplyDeltaAdd(float delta)
+		{
+			if (Mathf.Abs(delta) < Mathf.Epsilon)
+				return;
+			desc.add += delta * desc.speed;
+		}
+
+		public void ApplyDeltaMul(float delta)
+		{
+			if (Mathf.Abs(delta) < Mathf.Epsilon)
+				return;
+			desc.mul += delta * desc.speed;
+		}
+
 		public void Set(float v)
 		{
 			Value = Mathf.Clamp( v, desc.min, desc.max );
@@ -152,7 +166,10 @@ public class VeeJoy : MonoBehaviour {
 		if (Input.GetKeyDown("tab"))
 			showGUI = !showGUI;
 
-		if (!CurrentController.desc.listen) {
+		if (CurrentController.desc.listen) {
+			CurrentController.ApplyDeltaAdd(Input.GetAxis("Vertical3") * Time.deltaTime);
+			CurrentController.ApplyDeltaMul(Input.GetAxis("Horizontal3") * Time.deltaTime);
+		} else {
 			CurrentController.ApplyDelta(Input.GetAxis("Vertical3") * Time.deltaTime);
 		}
 
@@ -165,8 +182,6 @@ public class VeeJoy : MonoBehaviour {
 			} else if (Input.GetKeyDown("joystick button 5")) {
 				CurrentController.desc.band = (++CurrentController.desc.band) % 16;
 			}
-			// add
-			// mul
 			// toggle listen
 			if (Input.GetKeyDown("joystick button 8")) {
 				CurrentController.desc.listen = !CurrentController.desc.listen;
