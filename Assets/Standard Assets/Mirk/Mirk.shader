@@ -15,10 +15,10 @@ Shader "Mirk/Overlay" {
 		AlphaTest Greater [AlphaThreshold]
 
 		// Don't use alpha for blending
-		Blend One One
+		//Blend One One
 		//Blend SrcColor OneMinusSrcColor
 		//Blend One OneMinusSrcColor
-		//Blend SrcColor One
+		Blend SrcColor One
 
 		// Nice effects, but need different fading
 		//Blend SrcColor DstColor
@@ -40,6 +40,8 @@ void surf (Input IN, inout SurfaceOutput o) {
 	o.Alpha = frac( NoiseBands * (0.5 + 0.5 * snoise( IN.worldPos * NoiseScale)));
 	o.Emission = _Color.rgb * Fade * o.Alpha;
 }
+
+
 
 ENDCG
 
