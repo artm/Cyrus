@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 public class VeeJoy : MonoBehaviour {
@@ -219,6 +220,7 @@ public class VeeJoy : MonoBehaviour {
 		foreach(FloatDesc desc in floats) {
 			FloatController.AddToList(desc, floatControllers);
 		}
+		floatControllers = floatControllers.OrderBy(x => x.Name).ToList();
 	}
 
 	void Update () {
