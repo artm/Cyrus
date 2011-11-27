@@ -9,13 +9,15 @@ using System.Collections;
 public class MirkPlacer : MonoBehaviour {
 
 	public float minDistance = 0;
-
-	Vector3 lastParentPos;
-	float maxDistance;
-
 	public Renderer fadeLayer = null;
+
+	public float noiseScale = 1;
+	float oldScale = 1;
+
 	Material origMaterial;
 	float fade = 1;
+	Vector3 lastParentPos;
+	float maxDistance;
 
 	void Start () {
 		lastParentPos = transform.parent.position;
@@ -23,12 +25,24 @@ public class MirkPlacer : MonoBehaviour {
 
 		if (fadeLayer) {
 			origMaterial = fadeLayer.sharedMaterial;
+			oldScale = noiseScale = origMaterial.GetFloat("NoiseScale");
 		}
 	}
 	
 	void Update () {
-		float delta; // how much parent moved in the current view position
-		delta = transform.parent.InverseTransformPoint(lastParentPos).z;
+		if (oldScale != noiseScale) {
+			origMaterial.SetFloat("NoiseScale", noiseScale);
+
+			// we want to pin layer 1 in noise space
+			Vector3 l1 = transform.GetChild(1).position;
+			Vector3 offset = l1 * oldScale / noiseScale - l1;
+			transform.parent.position += offset;
+			lastParentPos += offset;
+			oldScale = noiseScale;
+		}
+		
+		// how much parent moved in the current view direction
+		float delta = transform.parent.InverseTransformPoint(lastParentPos).z;
 
 		lastParentPos = transform.parent.position;
 
@@ -41,7 +55,6 @@ public class MirkPlacer : MonoBehaviour {
 			fadeLayer.material.CopyPropertiesFromMaterial(origMaterial);
 			fade = newFade;
 			fadeLayer.material.SetFloat("Fade", fade);
-
 		}
 	}
 }
