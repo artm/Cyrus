@@ -214,13 +214,6 @@ public class VeeJoy : MonoBehaviour {
 		}
 	}
 
-	[System.Serializable]
-	public class ControlGroup {
-		public Object target;
-		public FloatController[] properties;
-	}
-
-
 	void Start () {
 		// at startup make a list of individual properties
 		foreach(FloatDesc desc in floats) {
